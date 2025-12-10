@@ -2,27 +2,203 @@
 <html lang="sl">
 <head>
   <meta charset="UTF-8">
-  <title>Darkov stenski koledar – tedenski (iCal – brez napak)</title>
+  <title>Darkov stenski koledar – tedenski (iCal delujoča verzija)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Tvoj originalni CSS – ostaja enak */
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, sans-serif; background: #000; color: #f9fafb; overflow: hidden; }
-    .bg { position: fixed; inset: 0; background-image: url("https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg"); background-size: cover; background-position: center; z-index: -2; }
-    .bg-overlay { position: fixed; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.9) 100%); z-index: -1; }
-    .layout { height: 100vh; padding: 1.5rem 2rem 1rem 2rem; display: flex; flex-direction: column; justify-content: space-between; }
-    .top-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; }
-    .clock-wrapper { flex: 1; text-align: center; margin-top: 0.2rem; }
-    #clock-time { font-size: 4.5rem; letter-spacing: 0.15em; font-weight: 600; text-shadow: 0 6px 20px rgba(0,0,0,0.7); }
-    #clock-date { margin-top: 0.3rem; font-size: 1.1rem; text-shadow: 0 4px 12px rgba(0,0,0,0.7); text-transform: lowercase; }
-    .sun-info { margin-top: 0.3rem; font-size: 0.95rem; display: flex; justify-content: center; gap: 1rem; opacity: 0.9; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #000;
+      color: #f9fafb;
+      overflow: hidden;
+    }
+    .bg {
+      position: fixed; inset: 0;
+      background-image: url("https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg");
+      background-size: cover;
+      background-position: center;
+      z-index: -2;
+    }
+    .bg-overlay {
+      position: fixed; inset: 0;
+      background: linear-gradient(to bottom,
+        rgba(0,0,0,0.3) 0%,
+        rgba(0,0,0,0.55) 30%,
+        rgba(0,0,0,0.9) 100%);
+      z-index: -1;
+    }
+    .layout {
+      height: 100vh;
+      padding: 1.5rem 2rem 1rem 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+    .clock-wrapper {
+      flex: 1;
+      text-align: center;
+      margin-top: 0.2rem;
+    }
+    #clock-time {
+      font-size: 4.5rem;
+      letter-spacing: 0.15em;
+      font-weight: 600;
+      text-shadow: 0 6px 20px rgba(0,0,0,0.7);
+    }
+    #clock-date {
+      margin-top: 0.3rem;
+      font-size: 1.1rem;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.7);
+      text-transform: lowercase;
+    }
+    .sun-info {
+      margin-top: 0.3rem;
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      opacity: 0.9;
+    }
     .sun-info span { display: flex; align-items: center; gap: 0.3rem; }
-    .weather-card { width: 330px; background: rgba(15,23,42,0.5); border-radius: 18px; padding: 0.8rem; border: 1px solid rgba(148,163,184,0.6); backdrop-filter: blur(10px); box-shadow: 0 12px 30px rgba(0,0,0,0.7); font-size: 0.85rem; }
-    /* ... ostali CSS enak kot prej ... */
-    .timeline { display: flex; gap: 0.6rem; overflow-x: auto; padding-bottom: 0.4rem; }
-    .day-column { min-width: 190px; max-width: 260px; background: rgba(15,23,42,0.85); border-radius: 16px; padding: 0.5rem 0.6rem; border: 1px solid rgba(148,163,184,0.65); box-shadow: 0 10px 30px rgba(0,0,0,0.7); display: flex; flex-direction: column; }
-    .day-column.today { border: 2px solid rgba(147,197,253,0.8); box-shadow: 0 0 20px rgba(147,197,253,0.4); }
-    /* ... preostanek CSS ... */
+    .weather-card {
+      width: 330px;
+      background: rgba(15,23,42,0.5);
+      border-radius: 18px;
+      padding: 0.8rem;
+      border: 1px solid rgba(148,163,184,0.6);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.7);
+      font-size: 0.85rem;
+    }
+    .weather-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .badge {
+      border-radius: 999px;
+      border: 1px solid rgba(248,250,252,0.7);
+      padding: 0.1rem 0.5rem;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .weather-frame-wrap {
+      margin-top: 0.4rem;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(100,116,139,0.7);
+      background: #020617;
+    }
+    .weather-frame {
+      width: 100%;
+      height: 210px;
+      border: none;
+    }
+    #hourlyWeather {
+      margin-top: 0.4rem;
+      font-size: 0.78rem;
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.3rem 0;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .hour-item {
+      flex: 0 0 auto;
+      padding: 0.2rem 0.45rem;
+      border-radius: 6px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: rgba(30,41,59,0.8);
+    }
+    .bottom-row {
+      margin-top: 0.4rem;
+      display: flex;
+      flex-direction: column;
+      height: 45vh;
+    }
+    .status-bar {
+      font-size: 0.78rem;
+      opacity: 0.9;
+      margin-bottom: 0.2rem;
+    }
+    .week-nav {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 0.3rem;
+      font-size: 0.8rem;
+    }
+    .week-nav button {
+      padding: 0.2rem 0.6rem;
+      border-radius: 8px;
+      border: 1px solid rgba(148,163,184,0.8);
+      background: rgba(15,23,42,0.9);
+      color: #f9fafb;
+      cursor: pointer;
+    }
+    .week-nav button:hover {
+      background: rgba(30,64,175,0.9);
+    }
+    .timeline {
+      display: flex;
+      gap: 0.6rem;
+      overflow-x: auto;
+      padding-bottom: 0.4rem;
+    }
+    .day-column {
+      min-width: 190px;
+      max-width: 260px;
+      background: rgba(15,23,42,0.85);
+      border-radius: 16px;
+      padding: 0.5rem 0.6rem;
+      border: 1px solid rgba(148,163,184,0.65);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      max-height: 100%;
+    }
+    .day-column.today {
+      border: 2px solid rgba(147,197,253,0.8);
+      box-shadow: 0 0 20px rgba(147,197,253,0.4);
+    }
+    .day-header {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+      text-transform: capitalize;
+    }
+    .day-date {
+      font-size: 0.75rem;
+      color: #cbd5f5;
+      margin-bottom: 0.3rem;
+    }
+    .event-list {
+      overflow-y: auto;
+      flex: 1;
+      font-size: 0.8rem;
+    }
+    .event-item {
+      margin-bottom: 0.35rem;
+      padding: 0.25rem 0.35rem;
+      border-radius: 8px;
+      background: rgba(37,99,235,0.5);
+      border: 1px solid rgba(129,140,248,0.8);
+      cursor: pointer;
+    }
+    .event-item.all-day {
+      background: rgba(16,185,129,0.55);
+      border-color: rgba(45,212,191,0.85);
+    }
+    .event-time { font-weight: 600; margin-bottom: 0.05rem; }
+    .event-title { white-space: normal; }
+    .event-location { font-size: 0.7rem; opacity: 0.9; }
   </style>
   <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
   <script src="https://unpkg.com/ical.js@1.5.0/build/ical.js"></script>
@@ -53,74 +229,162 @@
       </div>
     </div>
     <div class="bottom-row">
-      <div class="status-bar" id="status">Nalagam koledar...</div>
+      <div class="status-bar" id="status">Inicializacija...</div>
       <div class="week-nav">
-        <button id="prevWeek">‹ prejšnji</button>
+        <button id="prevWeek">‹ prejšnji teden</button>
         <button id="todayWeek">ta teden</button>
-        <button id="nextWeek">naslednji ›</button>
+        <button id="nextWeek">naslednji teden ›</button>
       </div>
       <div class="timeline"></div>
     </div>
   </div>
 
   <script>
-    // <<< ZAMENJAJ TO Z TVOJI SKRIVNIM iCal LINKOM >>>
+    // === TVOJ iCal LINK – ZAMENJAJ TO VRSTICO ===
     const ICAL_URL = 'https://calendar.google.com/calendar/ical/darkoevapetra%40gmail.com/private-8c92db034564a980b5ca30c789215bd3/basic.ics';
+    // Primer: private-3f8a9b2c1d4e5f6789a0b1c2d3e4f567890
 
     const LAT = 46.1720;
     const LNG = 15.0725;
     let weekOffset = 0;
 
-    function setStatus(msg) { document.getElementById('status').textContent = msg; }
+    function setStatus(msg) {
+      document.getElementById('status').textContent = msg;
+      console.log('Status:', msg);
+    }
 
-    // Ura, sonce, vreme – enako kot prej
+    // ---------- Ponudeljkov začetek tedna ----------
+    function getWeekStartMonday(date, offsetWeeks = 0) {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = (day === 0 ? -6 : 1 - day);
+      const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + diff + offsetWeeks * 7);
+      monday.setHours(0, 0, 0, 0);
+      return monday;
+    }
+
+    // ---------- Ura ----------
     function updateClock() {
       const now = new Date();
       document.getElementById('clock-time').textContent = now.toLocaleTimeString('sl-SI', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
       document.getElementById('clock-date').textContent = now.toLocaleDateString('sl-SI', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
     }
+
+    // ---------- Sonce ----------
     function updateSun() {
       const times = SunCalc.getTimes(new Date(), LAT, LNG);
       document.getElementById('sunrise').textContent = times.sunrise.toTimeString().slice(0,5);
       document.getElementById('sunset').textContent = times.sunset.toTimeString().slice(0,5);
     }
-    async function loadHourlyWeather() { /* enako kot prej */ }
 
-    // iCal del – glavna sprememba
-    async function loadEvents() {
-      const weekStart = getWeekStartMonday(new Date(), weekOffset);
+    // ---------- Vreme ----------
+    async function loadHourlyWeather() {
+      const box = document.getElementById('hourlyWeather');
       try {
-        setStatus('Prenašam koledar...');
-        const resp = await fetch(`https://corsproxy.io/?${encodeURIComponent(ICAL_URL)}`);
-        const text = await resp.text();
-        const data = ICAL.parse(text);
-        const comp = new ICAL.Component(data);
-        const vevents = comp.getAllSubcomponents('vevent');
-        const events = vevents.map(v => new ICAL.Event(v)).map(e => ({
-          summary: e.summary || '(brez naslova)',
-          location: e.location || '',
-          start: e.startDate.toJSDate(),
-          end: e.endDate.toJSDate(),
-          allDay: e.startDate.isDate
-        }));
-        renderTimeline(weekStart, events.filter(ev => ev.start < new Date(weekStart.getTime() + 7*24*60*60*1000) && ev.end > weekStart));
-        setStatus('Koledar naložen');
+        const res = await fetch('https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=46.1720&lon=15.0725');
+        const data = await res.json();
+        box.innerHTML = '';
+        data.properties.timeseries.slice(0, 12).forEach(t => {
+          const time = t.time.slice(11,16);
+          const temp = t.data.instant.details.air_temperature.toFixed(1);
+          box.innerHTML += `<span class="hour-item">${time} • ${temp}°C</span>`;
+        });
       } catch (e) {
-        setStatus('Napaka pri iCal – preveri link');
+        box.textContent = 'Vreme nedosegljivo';
       }
     }
 
-    // renderTimeline, getWeekStartMonday, navigacija – enako kot prej
+    // ---------- Koledar (iCal) ----------
+    async function loadEvents() {
+      if (!ICAL_URL || !ICAL_URL.includes('private-')) {
+        setStatus('NAPAKA: Vstavi pravi iCal link v kodo!');
+        return;
+      }
 
+      const now = new Date();
+      const weekStart = getWeekStartMonday(now, weekOffset);
+      const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+      try {
+        setStatus('Prenašam koledar...');
+        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(ICAL_URL);
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error('Ni dostopa do iCal datoteke');
+
+        const icsText = await response.text();
+        const jcalData = ICAL.parse(icsText);
+        const comp = new ICAL.Component(jcalData);
+        const vevents = comp.getAllSubcomponents('vevent');
+
+        const events = vevents.map(vevent => {
+          const event = new ICAL.Event(vevent);
+          return {
+            summary: event.summary || '(brez naslova)',
+            location: event.location || '',
+            startDate: event.startDate.toJSDate(),
+            endDate: event.endDate.toJSDate(),
+            allDay: event.startDate.isDate
+          };
+        }).filter(e => e.startDate < weekEnd && e.endDate > weekStart);
+
+        renderTimeline(weekStart, events);
+        setStatus(`${events.length} dogodkov • ${now.toLocaleDateString('sl-SI', {weekday:'long', day:'numeric', month:'long'})}`);
+      } catch (err) {
+        console.error(err);
+        setStatus('Napaka pri koledarju – preveri iCal link');
+      }
+    }
+
+    // ---------- Render koledarja ----------
+    function renderTimeline(weekStart, events) {
+      const timeline = document.querySelector('.timeline');
+      timeline.innerHTML = '';
+
+      for (let i = 0; i < 7; i++) {
+        const dayDate = new Date(weekStart.getTime() + i * 24 * 60 * 60 * 1000);
+        const dayKey = dayDate.toISOString().slice(0,10);
+        const dayEvents = events.filter(e => {
+          const eDay = e.startDate.toISOString().slice(0,10);
+          return eDay === dayKey || (e.allDay && e.startDate <= dayDate && e.endDate > dayDate);
+        });
+
+        const col = document.createElement('div');
+        col.className = 'day-column';
+        if (dayDate.toISOString().slice(0,10) === new Date().toISOString().slice(0,10)) col.classList.add('today');
+
+        col.innerHTML = `
+          <div class="day-header">${dayDate.toLocaleDateString('sl-SI', {weekday:'long'})}</div>
+          <div class="day-date">${dayDate.toLocaleDateString('sl-SI', {day:'numeric', month:'numeric', year:'numeric'})}</div>
+          <div class="event-list">
+            ${dayEvents.length === 0 ? '<div style="opacity:0.6;">Ni dogodkov</div>' : dayEvents.map(e => `
+              <div class="event-item ${e.allDay ? 'all-day' : ''}">
+                <div class="event-time">${e.allDay ? 'Cel dan' : e.startDate.toLocaleTimeString('sl-SI',{hour:'2-digit',minute:'2-digit'}) + '–' + e.endDate.toLocaleTimeString('sl-SI',{hour:'2-digit',minute:'2-digit'})}</div>
+                <div class="event-title">${e.summary}</div>
+                ${e.location ? `<div class="event-location">${e.location}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+        timeline.appendChild(col);
+      }
+    }
+
+    // ---------- Zagon ----------
     document.addEventListener('DOMContentLoaded', () => {
-      updateClock(); setInterval(updateClock, 1000);
+      updateClock();
+      setInterval(updateClock, 1000);
       updateSun();
       loadHourlyWeather();
       loadEvents();
-      setInterval(loadEvents, 600000); // osveži vsakih 10 min
-      // navigacijske tipke
+
+      // Navigacija po tednih
+      document.getElementById('prevWeek').addEventListener('click', () => { weekOffset--; loadEvents(); });
+      document.getElementById('todayWeek').addEventListener('click', () => { weekOffset = 0; loadEvents(); });
+      document.getElementById('nextWeek').addEventListener('click', () => { weekOffset++; loadEvents(); });
+
+      // Osveži vsakih 10 minut
+      setInterval(loadEvents, 10 * 60 * 1000);
     });
   </script>
 </body>
 </html>
-
