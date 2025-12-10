@@ -2,7 +2,7 @@
 <html lang="sl">
 <head>
   <meta charset="UTF-8">
-  <title>Darkov stenski koledar – tedenski (delujoča iCal verzija)</title>
+  <title>Darkov stenski koledar – tedenski</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     * { box-sizing: border-box; }
@@ -77,7 +77,7 @@
   </div>
 
   <script>
-    // ZAMENJAJ S SVOJIM PRAVIM iCal LINKOM (če ta ni pravi)
+    // ZAMENJAJ TO Z TVOJI PRAVIM iCal LINKOM
     const ICAL_URL = 'https://calendar.google.com/calendar/ical/darkoevapetra%40gmail.com/private-8c92db034564a980b5ca30c789215bd3/basic.ics';
 
     const LAT = 46.1720;
@@ -88,8 +88,8 @@
       document.getElementById('status').textContent = msg;
     }
 
-    // TO JE MANJKALO – funkcija za ponedeljek
-    function getWeekStartMonday(date, offsetWeeks = 0) {
+    // FUNKCIJA, KI JE MANJKALA
+    function getWeekStartMonday(date = new Date(), offsetWeeks = 0) {
       const d = new Date(date);
       const day = d.getDay();
       const diff = (day === 0 ? -6 : 1 - day);
@@ -100,8 +100,8 @@
 
     function updateClock() {
       const now = new Date();
-      document.getElementById('clock-time').textContent = now.toLocaleTimeString('sl-SI', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-      document.getElementById('clock-date').textContent = now.toLocaleDateString('sl-SI', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+      document.getElementById('clock-time').textContent = now.toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      document.getElementById('clock-date').textContent = now.toLocaleDateString('sl-SI', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     }
 
     function updateSun() {
@@ -127,6 +127,11 @@
     }
 
     async function loadEvents() {
+      if (!ICAL_URL.includes('private-')) {
+        setStatus('NAPAKA: Preveri iCal link v kodi!');
+        return;
+      }
+
       const now = new Date();
       const weekStart = getWeekStartMonday(now, weekOffset);
       const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -135,29 +140,26 @@
         setStatus('Prenašam koledar...');
         const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(ICAL_URL);
         const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error('Napaka pri dostopu do iCal');
+        if (!response.ok) throw new Error('Napaka pri iCal');
 
         const icsText = await response.text();
         const jcalData = ICAL.parse(icsText);
         const comp = new ICAL.Component(jcalData);
         const vevents = comp.getAllSubcomponents('vevent');
 
-        const events = vevents.map(vevent => {
-          const event = new ICAL.Event(vevent);
-          return {
-            summary: event.summary || '(brez naslova)',
-            location: event.location || '',
-            startDate: event.startDate.toJSDate(),
-            endDate: event.endDate.toJSDate(),
-            allDay: event.startDate.isDate
-          };
-        }).filter(e => e.startDate < weekEnd && e.endDate > weekStart);
+        const events = vevents.map(vevent => new ICAL.Event(vevent)).map(e => ({
+          summary: e.summary || '(brez naslova)',
+          location: e.location || '',
+          startDate: e.startDate.toJSDate(),
+          endDate: e.endDate.toJSDate(),
+          allDay: e.startDate.isDate
+        })).filter(e => e.startDate < weekEnd && e.endDate > weekStart);
 
         renderTimeline(weekStart, events);
         setStatus(`${events.length} dogodkov naloženih`);
       } catch (err) {
         console.error(err);
-        setStatus('Napaka pri koledarju – preveri iCal link');
+        setStatus('Napaka pri koledarju – preveri link');
       }
     }
 
@@ -166,7 +168,8 @@
       timeline.innerHTML = '';
 
       for (let i = 0; i < 7; i++) {
-        const dayDate = new Date(weekStart.getTime() + i * 24 * 60 * 60 * 1000);
+        const dayDate = new Date(weekStart);
+        dayDate.setDate(dayDate.getDate() + i);
         const dayKey = dayDate.toISOString().slice(0,10);
         const dayEvents = events.filter(e => {
           const eDay = e.startDate.toISOString().slice(0,10);
@@ -175,7 +178,7 @@
 
         const col = document.createElement('div');
         col.className = 'day-column';
-        if (dayDate.toISOString().slice(0,10) === new Date().toISOString().slice(0,10)) col.classList.add('today');
+        if (dayKey === new Date().toISOString().slice(0,10)) col.classList.add('today');
 
         col.innerHTML = `
           <div class="day-header">${dayDate.toLocaleDateString('sl-SI', {weekday:'long'})}</div>
